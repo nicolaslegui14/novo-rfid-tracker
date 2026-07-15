@@ -190,9 +190,28 @@ function save(){
 }
 
 // ─── Progreso compartido (Netlify Blobs vía función serverless) ───
+// IMPORTANTE: nunca reemplazamos P a ciegas con lo remoto — siempre FUSIONAMOS,
+// tomando el máximo por item/día, para que nunca se pierda progreso ya tagged.
 const REMOTE_URL = "/api/progress";
 let lastLocalEditAt = 0;
 let pushTimer = null;
+
+function mergeProgress(a, b){
+  if (!a) return b;
+  if (!b) return a;
+  const merged = { v:2, tagged:{}, notes:{}, qty:{}, log:{} };
+  const tagKeys = new Set([...Object.keys(a.tagged||{}), ...Object.keys(b.tagged||{})]);
+  tagKeys.forEach(k => { merged.tagged[k] = Math.max(a.tagged?.[k]||0, b.tagged?.[k]||0); });
+  const newer = (b.updatedAt||"") > (a.updatedAt||"") ? b : a;
+  const older = newer === b ? a : b;
+  merged.qty = Object.assign({}, older.qty||{}, newer.qty||{});
+  merged.notes = Object.assign({}, older.notes||{}, newer.notes||{});
+  const dayKeys = new Set([...Object.keys(a.log||{}), ...Object.keys(b.log||{})]);
+  dayKeys.forEach(d => { merged.log[d] = Math.max(a.log?.[d]||0, b.log?.[d]||0); });
+  merged.updatedAt = new Date().toISOString();
+  return merged;
+}
+
 function pushRemote(){
   lastLocalEditAt = Date.now();
   clearTimeout(pushTimer);
@@ -212,31 +231,28 @@ async function fetchRemote(){
 }
 async function syncInit(){
   const remote = await fetchRemote();
-  const localHasData = Object.keys(P.tagged||{}).length > 0;
-  if (remote) {
-    // El servidor ya tiene estado compartido: lo usamos como fuente de verdad
-    if (!remote.qty) remote.qty = {};
-    if (!remote.notes) remote.notes = {};
-    if (!remote.log) remote.log = {};
-    P = remote;
-    try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch(e){}
-    render();
-  } else if (localHasData) {
+  if (!remote) {
     // No hay estado compartido todavía: sembramos el servidor con lo que tenemos localmente
-    pushRemote();
+    if (Object.keys(P.tagged||{}).length > 0) pushRemote();
+    return;
   }
+  const merged = mergeProgress(P, remote);
+  const changed = JSON.stringify(merged) !== JSON.stringify(P);
+  P = merged;
+  try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch(e){}
+  if (changed) { render(); pushRemote(); } // si la fusión agregó algo nuevo, republicamos
 }
 function pollRemote(){
   setInterval(async () => {
     if (Date.now() - lastLocalEditAt < 4000) return; // no pisar ediciones recientes del usuario
     const remote = await fetchRemote();
-    if (remote && JSON.stringify(remote) !== JSON.stringify(P)) {
-      if (!remote.qty) remote.qty = {};
-      if (!remote.notes) remote.notes = {};
-      if (!remote.log) remote.log = {};
-      P = remote;
+    if (!remote) return;
+    const merged = mergeProgress(P, remote);
+    if (JSON.stringify(merged) !== JSON.stringify(P)) {
+      P = merged;
       try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch(e){}
       render();
+      pushRemote();
     }
   }, 20000);
 }
