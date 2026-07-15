@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Novo Studio · Etiquetado RFID</title>
+<style>
+:root{--bg:#F2F3F1;--panel:#fff;--ink:#1C2321;--soft:#5A6360;--line:#DDE1DC;--green:#2E6E4E;--greensoft:#E4EFE8;--brass:#A8853B;--amber:#B4690E;--gray:#9AA39E;--red:#A33}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;padding-bottom:90px}
+header{background:var(--ink);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 12px}
+.hwrap{max-width:860px;margin:0 auto}
+.brand{font-size:11px;letter-spacing:2.5px;color:var(--brass);font-weight:600}
+.title{font-size:19px;font-weight:700}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.pct{font-size:26px;font-weight:700;text-align:right}
+.units{font-size:11px;color:#B9C2BD;text-align:right}
+.hbar{background:#3a423e;border-radius:99px;height:6px;overflow:hidden;margin-top:9px}
+.hbar>div{height:100%;background:var(--brass);border-radius:99px;transition:width .4s}
+.saved{background:var(--greensoft);color:var(--green);padding:5px 14px;font-size:11px;text-align:center}
+nav{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;display:flex;max-width:100%}
+nav button{flex:1;padding:13px 4px;border:none;background:none;font-size:14px;font-weight:500;color:var(--soft);border-bottom:3px solid transparent;cursor:pointer;font-family:inherit}
+nav button.on{color:var(--green);font-weight:700;border-bottom-color:var(--green)}
+main{max-width:860px;margin:0 auto;padding:14px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card .lbl{font-size:10px;color:var(--soft);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.card .val{font-size:21px;font-weight:700}
+.stitle{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin:16px 0 10px}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 16px}
+.catrow{padding:11px 0;border-bottom:1px solid var(--line)}
+.catrow:last-child{border-bottom:none}
+.cathead{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
+.cathead b{font-weight:600}
+.cathead span{color:var(--soft);font-size:12px}
+.bar{background:var(--line);border-radius:99px;height:8px;overflow:hidden}
+.bar>div{height:100%;border-radius:99px;transition:width .4s;background:var(--brass)}
+.bar>div.full{background:var(--green)}
+.chart{display:flex;align-items:flex-end;gap:5px;height:95px;padding:14px 12px 8px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.cbar{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.cbar .v{font-size:9px;color:var(--soft)}
+.cbar .b{width:100%;max-width:32px;background:var(--green);border-radius:4px 4px 0 0}
+.cbar .d{font-size:8px;color:var(--gray);white-space:nowrap}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters input,.filters select{padding:11px 12px;border-radius:10px;border:1px solid var(--line);font-size:14px;background:#fff;font-family:inherit;color:var(--ink)}
+.filters input{flex:2 1 160px}
+.filters select{flex:1 1 120px}
+.count{font-size:12px;color:var(--soft);margin-bottom:8px}
+.item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+.item.done{border-color:#BFDCCB;opacity:.78}
+.irow{display:flex;align-items:center;gap:9px}
+.thumb{width:52px;height:52px;border-radius:10px;flex-shrink:0;overflow:hidden;background:#EDEFEC;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:zoom-in}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.imid{flex:1;min-width:0;cursor:pointer}
+.iname{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.item.done .iname span{text-decoration:line-through}
+.dot{width:8px;height:8px;border-radius:99px;flex-shrink:0;background:#C9CFCA}
+.dot.p{background:var(--brass)}.dot.f{background:var(--green)}
+.imeta{font-size:12px;color:var(--soft);margin-left:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icount{font-size:14px;font-weight:700;white-space:nowrap}
+.item.done .icount{color:var(--green)}
+.mbtn{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:14px;font-weight:700;cursor:pointer;color:var(--ink);flex-shrink:0;font-family:inherit}
+.mbtn.go{background:var(--green);color:#fff;border:none}
+.mbtn.warn{color:var(--red)}
+.mbtn.warnfill{background:var(--red);color:#fff;border:none}
+.detail{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.drow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.drow .q{font-size:12px;color:var(--red)}
+.note{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);font-size:13px;font-family:inherit}
+.btn{border:none;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.pri{background:var(--green);color:#fff}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.report{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;font-size:13px;white-space:pre-wrap;font-family:ui-monospace,monospace;line-height:1.6;word-break:break-word}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.hint{font-size:12px;color:var(--soft);margin-top:10px;line-height:1.5}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:99px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:110;display:none;align-items:center;gap:12px;max-width:92vw}
+#toast span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toast button{background:none;border:none;color:#E8C877;font-weight:700;font-size:14px;cursor:pointer;flex-shrink:0;font-family:inherit;padding:2px 4px}
+#lightbox{position:fixed;inset:0;background:rgba(20,25,22,.9);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+#lightbox img{max-width:94%;max-height:75%;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#lightbox .ln{color:#fff;margin-top:12px;font-size:15px;font-weight:600;text-align:center}
+#lightbox .lh{color:#B9C2BD;font-size:12px;margin-top:4px}
+.empty{text-align:center;padding:50px 20px;color:var(--soft)}
+.hidden{display:none!important}
+@media(min-width:640px){.cards{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="hrow">
+      <div><div class="brand">NOVO STUDIO</div><div class="title">Etiquetado RFID</div></div>
+      <div><div class="pct" id="hpct">0%</div><div class="units" id="hunits"></div></div>
+    </div>
+    <div class="hbar"><div id="hfill" style="width:0%"></div></div>
+  </div>
+</header>
+<div class="saved" id="savedbar">✓ Guardado automático activo en este dispositivo</div>
+<nav>
+  <button data-tab="panel" class="on">Panel</button>
+  <button data-tab="items">Items</button>
+  <button data-tab="reporte">Reporte</button>
+</nav>
+<main>
+  <section id="tab-panel">
+    <div class="cards">
+      <div class="card"><div class="lbl">Items completados</div><div class="val" id="s-done">—</div></div>
+      <div class="card"><div class="lbl">Unidades restantes</div><div class="val" id="s-rem">—</div></div>
+      <div class="card"><div class="lbl">Ritmo (prom. 7 días)</div><div class="val" id="s-pace">—</div></div>
+      <div class="card"><div class="lbl">Días para terminar</div><div class="val" id="s-eta">—</div></div>
+    </div>
+    <div class="stitle">Avance por categoría</div>
+    <div class="box" id="catlist"></div>
+    <div class="stitle">Actividad diaria (últimos 14 días)</div>
+    <div class="chart" id="chart"><div class="empty" style="padding:10px;flex:1">Aún sin actividad registrada</div></div>
+  </section>
+
+  <section id="tab-items" class="hidden">
+    <div class="filters">
+      <input id="f-search" placeholder="Buscar por nombre o SKU…">
+      <select id="f-cat"><option value="">Todas las categorías</option></select>
+      <select id="f-status">
+        <option value="">Todos</option>
+        <option value="pendiente">Pendientes</option>
+        <option value="parcial">Parciales</option>
+        <option value="completo">Completos</option>
+      </select>
+    </div>
+    <div class="count" id="f-count"></div>
+    <div id="itemlist"></div>
+    <div class="empty hidden" id="morehint"></div>
+  </section>
+
+  <section id="tab-reporte" class="hidden">
+    <div class="stitle">Reporte para la dueña</div>
+    <div class="report" id="reporttext"></div>
+    <div class="actions">
+      <button class="btn pri" id="btn-copy">Copiar reporte</button>
+      <button class="btn sec" id="btn-csv">Descargar CSV</button>
+      <button class="btn sec" id="btn-backup">💾 Descargar respaldo</button>
+      <button class="btn sec" id="btn-restore">Restaurar respaldo</button>
+      <input type="file" id="restorefile" accept=".json" style="display:none">
+    </div>
+    <div class="hint">El progreso se guarda automáticamente en este dispositivo. El respaldo incluye conteos, notas, historial y fotos tomadas — descárgalo semanalmente como copia de seguridad, o para pasar el progreso a otro teléfono.</div>
+    <div class="stitle" style="margin-top:24px">Zona de riesgo</div>
+    <button class="btn sec" style="color:var(--red)" id="btn-reset">Borrar todo el progreso…</button>
+  </section>
+</main>
+
+<div id="toast"><span id="toastmsg"></span><button id="toastundo" class="hidden">DESHACER</button></div>
+<div id="lightbox"><img id="lb-img"><div class="ln" id="lb-name"></div><div class="lh">Toca para cerrar</div></div>
+<input type="file" id="camfile" accept="image/*" capture="environment" style="display:none">
+
+<script src="inventory_data.js"></script>
+<script>
+"use strict";
+const INV = window.INVENTORY;
+const LS_KEY = "novo-rfid-progress-v1";
+const today = () => new Date().toISOString().slice(0,10);
+const $ = (s) => document.querySelector(s);
+
+// ─── Progreso (localStorage) ───
+let P = { tagged:{}, notes:{}, log:{}, qty:{} };
+try { const raw = localStorage.getItem(LS_KEY); if (raw) P = Object.assign(P, JSON.parse(raw)); } catch(e){}
+if (!P.qty) P.qty = {};
+const K = i => INV[i].k;
+const KMAP = {}; INV.forEach(it => KMAP[it.k] = it);
+// Migración v1→v2: progreso por posición → por SKU (estable ante actualizaciones de inventario)
+function migrateProgress(pr){
+  if (pr.v) return pr;
+  const np = { v:2, tagged:{}, notes:{}, log:pr.log||{}, qty:{} };
+  for (const [i,v] of Object.entries(pr.tagged||{})) if (INV[+i]) np.tagged[K(+i)] = v;
+  for (const [i,v] of Object.entries(pr.notes||{}))  if (INV[+i]) np.notes[K(+i)] = v;
+  for (const [i,v] of Object.entries(pr.qty||{}))    if (INV[+i]) np.qty[K(+i)] = v;
+  return np;
+}
+P = migrateProgress(P);
+// Cantidad efectiva: ajuste manual si existe, si no la de Rentopian
+const qy = i => (P.qty[K(i)] != null ? P.qty[K(i)] : INV[i].q);
+let saveTimer = null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(P)); $("#savedbar").textContent = "✓ Guardado " + new Date().toLocaleTimeString("es-US",{hour:"numeric",minute:"2-digit"}); }
+    catch(e){ $("#savedbar").textContent = "⚠ Error al guardar"; $("#savedbar").style.background="#F3DADA"; $("#savedbar").style.color="#A33"; }
+    pushRemote();
+  }, 150);
+}
+
+// ─── Progreso compartido (Netlify Blobs vía función serverless) ───
+const REMOTE_URL = "/api/progress";
+let lastLocalEditAt = 0;
+let pushTimer = null;
+function pushRemote(){
+  lastLocalEditAt = Date.now();
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    fetch(REMOTE_URL, { method: "POST", headers: {"content-type":"application/json"}, body: JSON.stringify(P) })
+      .then(r => { if (r.ok) { $("#savedbar").textContent = "✓ Sincronizado " + new Date().toLocaleTimeString("es-US",{hour:"numeric",minute:"2-digit"}); } })
+      .catch(()=>{});
+  }, 300);
+}
+async function fetchRemote(){
+  try {
+    const r = await fetch(REMOTE_URL, { cache: "no-store" });
+    if (!r.ok) return null;
+    const data = await r.json();
+    return (data && typeof data === "object" && data.tagged) ? data : null;
+  } catch(e){ return null; }
+}
+async function syncInit(){
+  const remote = await fetchRemote();
+  const localHasData = Object.keys(P.tagged||{}).length > 0;
+  if (remote) {
+    // El servidor ya tiene estado compartido: lo usamos como fuente de verdad
+    if (!remote.qty) remote.qty = {};
+    if (!remote.notes) remote.notes = {};
+    if (!remote.log) remote.log = {};
+    P = remote;
+    try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch(e){}
+    render();
+  } else if (localHasData) {
+    // No hay estado compartido todavía: sembramos el servidor con lo que tenemos localmente
+    pushRemote();
+  }
+}
+function pollRemote(){
+  setInterval(async () => {
+    if (Date.now() - lastLocalEditAt < 4000) return; // no pisar ediciones recientes del usuario
+    const remote = await fetchRemote();
+    if (remote && JSON.stringify(remote) !== JSON.stringify(P)) {
+      if (!remote.qty) remote.qty = {};
+      if (!remote.notes) remote.notes = {};
+      if (!remote.log) remote.log = {};
+      P = remote;
+      try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch(e){}
+      render();
+    }
+  }, 20000);
+}
+
+// ─── Fotos de cámara (IndexedDB) ───
+let db = null;
+const camCache = {};
+const idb = indexedDB.open("novo-rfid", 1);
+idb.onupgradeneeded = e => e.target.result.createObjectStore("photos");
+idb.onsuccess = e => { db = e.target.result; migratePhotoKeys(); };
+function migratePhotoKeys(){
+  try { if (localStorage.getItem("novo-idb-v2")) return; } catch(e){}
+  const st = db.transaction("photos","readwrite").objectStore("photos");
+  const req = st.openCursor();
+  req.onsuccess = ev => {
+    const c = ev.target.result;
+    if (c){ if (typeof c.key === "number" && INV[c.key]){ st.put(c.value, INV[c.key].k); c.delete(); } c.continue(); }
+    else { try { localStorage.setItem("novo-idb-v2","1"); } catch(e){} }
+  };
+}
+function camGetK(k){ return new Promise(res => { if(camCache[k]!==undefined) return res(camCache[k]); if(!db) return res(null); const r = db.transaction("photos").objectStore("photos").get(k); r.onsuccess = () => { camCache[k] = r.result || null; res(camCache[k]); }; r.onerror = () => res(null); }); }
+function camGet(i){ return camGetK(K(i)); }
+function camSetK(k,v){ return new Promise(res => { camCache[k]=v; if(!db) return res(false); const tx = db.transaction("photos","readwrite"); tx.objectStore("photos").put(v,k); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }
+function camSet(i,v){ return camSetK(K(i),v); }
+function camDel(i){ const k=K(i); camCache[k]=null; if(db){ db.transaction("photos","readwrite").objectStore("photos").delete(k); } }
+function camAll(){ return new Promise(res => { if(!db) return res({}); const out={}; const r = db.transaction("photos").objectStore("photos").openCursor(); r.onsuccess = e => { const c = e.target.result; if(c){ out[c.key]=c.value; c.continue(); } else res(out); }; r.onerror=()=>res({}); }); }
+
+// ─── Acciones ───
+let lastAction = null, toastTimer = null;
+function tag(i, delta, silent){
+  const cur = P.tagged[K(i)]||0, q = qy(i);
+  const next = Math.min(q, Math.max(0, cur+delta));
+  const real = next - cur;
+  if (!real) return;
+  P.tagged[K(i)] = next;
+  const t = today();
+  P.log[t] = (P.log[t]||0) + real;
+  save();
+  render();
+  if (!silent && real > 0){
+    lastAction = {i, delta: real};
+    toast(INV[i].n + " · " + next + "/" + q, true);
+  }
+}
+function setQty(i, v){
+  v = Math.max(0, Math.min(9999, Math.round(Number(v)||0)));
+  if (v === INV[i].q) delete P.qty[K(i)]; else P.qty[K(i)] = v;
+  const t = P.tagged[K(i)]||0;
+  if (t > v){ // si ya había etiquetado más que la nueva cantidad, ajustar
+    P.tagged[K(i)] = v;
+    P.log[today()] = (P.log[today()]||0) + (v - t);
+  }
+  save(); render();
+  toast(v === INV[i].q ? "Cantidad restaurada a la original" : "Cantidad ajustada: " + v + " (Rentopian: " + INV[i].q + ")");
+}
+function undo(){
+  if (!lastAction) return;
+  tag(lastAction.i, -lastAction.delta, true);
+  lastAction = null;
+  toast("Deshecho ✓");
+}
+function toast(msg, withUndo){
+  $("#toastmsg").textContent = msg;
+  $("#toastundo").classList.toggle("hidden", !withUndo);
+  $("#toast").style.display = "flex";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> $("#toast").style.display="none", withUndo?5000:2200);
+}
+$("#toastundo").onclick = undo;
+
+// ─── Stats ───
+function stats(){
+  let tu=0, tt=0, di=0; const cats={};
+  INV.forEach(it=>{
+    const q = qy(it.i), tg = P.tagged[it.k]||0;
+    tu += q; tt += tg;
+    if (tg>=q) di++;
+    const c = cats[it.c] = cats[it.c]||{q:0,t:0,n:0,d:0};
+    c.q+=q; c.t+=tg; c.n++; if(tg>=q) c.d++;
+  });
+  const entries = Object.entries(P.log).filter(([,v])=>v>0).sort((a,b)=>a[0]<b[0]?-1:1);
+  const last7 = entries.slice(-7);
+  const pace = last7.length ? Math.round(last7.reduce((s,[,v])=>s+v,0)/last7.length) : 0;
+  return {tu,tt,di,cats,entries,pace,rem:tu-tt,eta:pace>0?Math.ceil((tu-tt)/pace):null};
+}
+
+// ─── Render ───
+let tab="panel", expanded=null, camTarget=null;
+const listEl = $("#itemlist");
+
+function render(){
+  const S = stats();
+  const pct = S.tu ? Math.round(S.tt/S.tu*100) : 0;
+  $("#hpct").textContent = pct+"%";
+  $("#hpct").style.color = pct===100 ? "#7FD1A7" : "#fff";
+  $("#hunits").textContent = S.tt + " / " + S.tu + " unidades";
+  $("#hfill").style.width = pct+"%";
+
+  if (tab==="panel"){
+    $("#s-done").textContent = S.di + " / " + INV.length;
+    $("#s-rem").textContent = S.rem;
+    $("#s-rem").style.color = S.rem===0 ? "var(--green)" : "var(--amber)";
+    $("#s-pace").textContent = S.pace + "/día";
+    $("#s-eta").textContent = S.eta ? "~"+S.eta : "—";
+    $("#catlist").innerHTML = Object.entries(S.cats).sort((a,b)=>b[1].q-a[1].q).map(([c,v])=>
+      `<div class="catrow"><div class="cathead"><b>${esc(c)}</b><span>${v.t}/${v.q} · ${v.d}/${v.n} items</span></div>
+       <div class="bar"><div class="${v.t>=v.q?'full':''}" style="width:${v.q?Math.min(100,v.t/v.q*100):0}%"></div></div></div>`).join("");
+    const last14 = S.entries.slice(-14);
+    if (last14.length){
+      const mx = Math.max(...last14.map(([,v])=>v),1);
+      $("#chart").innerHTML = last14.map(([d,v])=>
+        `<div class="cbar"><div class="v">${v}</div><div class="b" style="height:${Math.max(4,v/mx*58)}px"></div><div class="d">${fmtD(d)}</div></div>`).join("");
+    }
+  }
+  if (tab==="items") renderList();
+  if (tab==="reporte") $("#reporttext").textContent = reportText(S);
+}
+
+function itemState(it){ const t=P.tagged[it.k]||0; return t>=qy(it.i)?"completo":t>0?"parcial":"pendiente"; }
+
+function renderList(){
+  const q = $("#f-search").value.toLowerCase().trim();
+  const fc = $("#f-cat").value, fs = $("#f-status").value;
+  const rows = INV.filter(it=>{
+    if (fc && it.c!==fc) return false;
+    if (fs && itemState(it)!==fs) return false;
+    if (q && !(it.n.toLowerCase().includes(q) || (it.s||"").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  $("#f-count").textContent = rows.length + " items";
+  const shown = rows.slice(0,200);
+  $("#morehint").classList.toggle("hidden", rows.length<=200);
+  if (rows.length>200) $("#morehint").textContent = "Mostrando 200 de "+rows.length+" — usa filtros para acotar.";
+  listEl.innerHTML = shown.map(it=>{
+    const Q = qy(it.i), t = P.tagged[it.k]||0, st = itemState(it), done = st==="completo";
+    const adj = P.qty[it.k] != null;
+    const open = expanded===it.i;
+    return `<div class="item ${done?'done':''}" data-i="${it.i}">
+      <div class="irow">
+        <div class="thumb" data-act="zoom">${it.p?`<img loading="lazy" src="${it.p}" alt="">`:"🪑"}</div>
+        <div class="imid" data-act="toggle">
+          <div class="iname"><div class="dot ${st==='parcial'?'p':done?'f':''}"></div><span>${esc(it.n)}</span></div>
+          <div class="imeta">${esc(it.c)}${it.s?" · "+esc(it.s):""}${adj?` · <b style="color:var(--amber)">ajustado</b>`:""}</div>
+        </div>
+        <div class="icount">${t}/${Q}${adj?`<span style="font-weight:400;color:var(--gray);font-size:11px"> (${it.q})</span>`:""}</div>
+        ${t>0?`<button class="mbtn" data-act="minus">−1</button>`:""}
+        ${!done?`<button class="mbtn" data-act="plus">+1</button><button class="mbtn go" data-act="full">✓</button>`:""}
+      </div>
+      ${open?`<div class="detail">
+        <div class="drow">
+          <span style="font-size:13px;color:var(--soft)">Cantidad real:</span>
+          <button class="mbtn" data-act="qminus">−</button>
+          <input class="qin" data-act="qinput" type="number" inputmode="numeric" min="0" value="${Q}" style="width:64px;padding:9px 6px;border-radius:9px;border:1px solid var(--line);font-size:15px;font-weight:700;text-align:center;font-family:inherit">
+          <button class="mbtn" data-act="qplus">+</button>
+          ${adj?`<button class="mbtn" data-act="qrestore" style="font-weight:500;font-size:12px">Restaurar (${it.q})</button>`:""}
+        </div>
+        <div class="drow">
+          <button class="mbtn" data-act="cam">📷 ${camCache[it.k]?"Cambiar foto":"Tomar foto"}</button>
+          ${camCache[it.k]?`<button class="mbtn warn" data-act="delcam">Quitar foto</button>`:""}
+          ${t>0?`<button class="mbtn warn" data-act="zero">Reiniciar a 0</button>`:""}
+        </div>
+        <input class="note" data-act="note" placeholder="Nota (ej: rango EPC, ubicación, motivo del ajuste)…" value="${esc(P.notes[it.k]||"")}">
+      </div>`:""}
+    </div>`;
+  }).join("");
+}
+
+listEl.addEventListener("click", async e=>{
+  const btn = e.target.closest("[data-act]"); if(!btn) return;
+  const item = e.target.closest(".item"); const i = +item.dataset.i;
+  const act = btn.dataset.act;
+  if (act==="plus") tag(i,1);
+  else if (act==="minus") tag(i,-1,true);
+  else if (act==="full") tag(i, qy(i) - (P.tagged[i]||0));
+  else if (act==="qplus") setQty(i, qy(i)+1);
+  else if (act==="qminus") setQty(i, qy(i)-1);
+  else if (act==="qrestore") setQty(i, INV[i].q);
+  else if (act==="toggle"){ expanded = expanded===i?null:i; if(expanded!==null) await camGet(i); renderList(); }
+  else if (act==="zero"){ if(confirm("¿Poner "+(P.tagged[K(i)]||0)+" → 0 en \""+INV[i].n+"\"?")){ tag(i,-(P.tagged[K(i)]||0),true); toast("Reiniciado a 0"); } }
+  else if (act==="cam"){ camTarget = i; $("#camfile").click(); }
+  else if (act==="delcam"){ camDel(i); renderList(); toast("Foto eliminada"); }
+  else if (act==="zoom"){ const src = camCache[K(i)] || (await camGet(i)) || INV[i].p; if(src){ $("#lb-img").src = src; $("#lb-name").textContent = INV[i].n; $("#lightbox").style.display = "flex"; } }
+});
+listEl.addEventListener("change", e=>{
+  const act = e.target.dataset.act;
+  if (act==="note"){ const i = +e.target.closest(".item").dataset.i; P.notes[K(i)] = e.target.value; save(); }
+  else if (act==="qinput"){ const i = +e.target.closest(".item").dataset.i; setQty(i, e.target.value); }
+});
+$("#lightbox").onclick = ()=> $("#lightbox").style.display="none";
+
+// Cámara: comprimir y guardar
+$("#camfile").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f || camTarget===null) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    const img = new Image();
+    img.onload = async ()=>{
+      const sc = Math.min(1, 600/Math.max(img.width,img.height));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(img.width*sc); cv.height = Math.round(img.height*sc);
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+      const ok = await camSet(camTarget, cv.toDataURL("image/jpeg",.68));
+      toast(ok?"Foto guardada ✓":"No se pudo guardar la foto");
+      renderList();
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+  e.target.value = "";
+});
+
+// ─── Reporte / CSV / Respaldo ───
+function reportText(S){
+  const pct = S.tu?Math.round(S.tt/S.tu*100):0;
+  const cats = Object.entries(S.cats).sort((a,b)=>(b[1].t/b[1].q)-(a[1].t/a[1].q))
+    .map(([c,v])=>`  • ${c}: ${v.t}/${v.q} unidades (${v.q?Math.round(v.t/v.q*100):100}%)`).join("\n");
+  const adjEntries = Object.entries(P.qty).map(([k,v])=>({it:KMAP[k], v})).filter(a=>a.it);
+  let adjBlock = "";
+  if (adjEntries.length){
+    const delta = adjEntries.reduce((s,a)=>s+(a.v-a.it.q),0);
+    const lines = adjEntries.slice(0,25).map(a=>`  • ${a.it.n}: Rentopian dice ${a.it.q}, físico real ${a.v} (${a.v-a.it.q>0?"+":""}${a.v-a.it.q})`).join("\n");
+    adjBlock = `\n\nDISCREPANCIAS DE INVENTARIO DETECTADAS (${adjEntries.length} items, diferencia neta ${delta>0?"+":""}${delta} unidades vs Rentopian):\n${lines}${adjEntries.length>25?`\n  … y ${adjEntries.length-25} más (ver CSV)`:""}`;
+  }
+  return `REPORTE DE ETIQUETADO RFID — NOVO STUDIO
+Fecha: ${new Date().toLocaleDateString("es-US",{day:"numeric",month:"long",year:"numeric"})}
+
+AVANCE GENERAL: ${pct}%
+Unidades etiquetadas: ${S.tt} de ${S.tu}
+Items completados: ${S.di} de ${INV.length}
+Ritmo actual: ~${S.pace} unidades/día
+${S.eta?`Estimado para completar: ~${S.eta} días de trabajo`:""}
+
+AVANCE POR CATEGORÍA:
+${cats}${adjBlock}`;
+}
+$("#btn-copy").onclick = ()=>{ navigator.clipboard.writeText(reportText(stats())).then(()=>toast("Reporte copiado ✓")).catch(()=>toast("No se pudo copiar")); };
+$("#btn-csv").onclick = ()=>{
+  const esc2 = v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const rows = INV.map(it=>{ const Q=qy(it.i), t=P.tagged[it.k]||0; const st=t>=Q?"Completo":t>0?"Parcial":"Pendiente";
+    const adj = P.qty[it.k]!=null ? "Sí ("+(Q-it.q>0?"+":"")+(Q-it.q)+")" : "";
+    return [esc2(it.n),esc2(it.c),esc2(it.s),it.q,Q,adj,t,st,esc2(P.notes[it.k]||"")].join(","); });
+  dl("\uFEFFItem,Categoría,SKU,Cant. Rentopian,Cant. real,Ajustado,Etiquetados,Estado,Nota\n"+rows.join("\n"), "novo-rfid-progreso-"+today()+".csv", "text/csv;charset=utf-8");
+};
+$("#btn-backup").onclick = async ()=>{
+  toast("Preparando respaldo…");
+  const photos = await camAll();
+  dl(JSON.stringify({type:"novo-backup",v:2,savedAt:new Date().toISOString(),progress:P,photos}), "novo-rfid-respaldo-"+today()+".json", "application/json");
+  toast("Respaldo descargado ✓");
+};
+$("#btn-restore").onclick = ()=> $("#restorefile").click();
+$("#restorefile").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = async ()=>{
+    try{
+      const bk = JSON.parse(rd.result);
+      if (bk.type!=="novo-backup" || !bk.progress) throw 0;
+      const tt = Object.values(bk.progress.tagged||{}).reduce((s,v)=>s+v,0);
+      if (!confirm("Restaurar respaldo del "+new Date(bk.savedAt).toLocaleString("es-US")+" con "+tt+" unidades etiquetadas? Reemplaza el progreso actual.")) return;
+      P = migrateProgress(Object.assign({tagged:{},notes:{},log:{},qty:{}}, bk.progress));
+      if (!P.qty) P.qty = {};
+      for (const [pk,v] of Object.entries(bk.photos||{})){
+        let key = pk;
+        if (/^\d+$/.test(pk) && INV[+pk]) key = INV[+pk].k; // respaldo formato viejo
+        await camSetK(key, v);
+      }
+      save(); render(); toast("Progreso restaurado ✓");
+    } catch { toast("El archivo no es un respaldo válido"); }
+  };
+  rd.readAsText(f);
+  e.target.value = "";
+});
+$("#btn-reset").onclick = ()=>{
+  if (!confirm("¿Borrar TODO el progreso? Esta acción no se puede deshacer.")) return;
+  if (!confirm("Última confirmación: se pierden todos los conteos, notas y fotos tomadas.")) return;
+  P = {v:2,tagged:{},notes:{},log:{},qty:{}};
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  if (db){ db.transaction("photos","readwrite").objectStore("photos").clear(); }
+  Object.keys(camCache).forEach(k=>delete camCache[k]);
+  save(); render(); toast("Progreso borrado");
+};
+
+function dl(content, name, type){
+  const b = new Blob([content],{type});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = name; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmtD(d){ return new Date(d+"T12:00:00").toLocaleDateString("es-US",{day:"numeric",month:"short"}); }
+
+// ─── Tabs y filtros ───
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick = ()=>{
+    tab = b.dataset.tab;
+    document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+    ["panel","items","reporte"].forEach(t=> $("#tab-"+t).classList.toggle("hidden", t!==tab));
+    render();
+  };
+});
+["#f-search","#f-cat","#f-status"].forEach(s=> $(s).addEventListener("input", renderList));
+$("#f-cat").innerHTML += [...new Set(INV.map(i=>i.c))].sort().map(c=>`<option>${esc(c)}</option>`).join("");
+
+render();
+syncInit();
+pollRemote();
+</script>
+</body>
+</html>
