@@ -1,5 +1,14 @@
 const { getStore } = require("@netlify/blobs");
 
+function getMyStore() {
+  const opts = { name: "rfid-progress", consistency: "strong" };
+  if (process.env.BLOBS_SITE_ID && process.env.BLOBS_TOKEN) {
+    opts.siteID = process.env.BLOBS_SITE_ID;
+    opts.token = process.env.BLOBS_TOKEN;
+  }
+  return getStore(opts);
+}
+
 const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, OPTIONS",
@@ -11,7 +20,7 @@ exports.handler = async (event) => {
     return { statusCode: 204, headers: CORS, body: "" };
   }
 
-  const store = getStore({ name: "rfid-progress", consistency: "strong" });
+  const store = getMyStore();
 
   if (event.httpMethod === "GET") {
     let data = null;
