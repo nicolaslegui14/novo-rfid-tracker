@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cabrillo</title>
+<meta name="description" content="Cabrillo makes shoes, belts and leather goods designed in California. Made to be worn in.">
+<meta name="theme-color" content="#F4EFE8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16120F" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238A4A20'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4EFE8'%3EC%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A1614;--bone:#F4EFE8;--cognac:#8A4A20;--tobacco:#5C3B22;--brass:#B08A45;--thread:#E9D3B4;
+  --bg:var(--bone);--fg:var(--ink);--muted:#5E544D;--line:rgba(26,22,20,.16);--accent:var(--cognac);--on-accent:#FBF7F1;
+  --surface:#EAE2D7;--band:var(--cognac);--on-band:#FBF7F1;
+  --serif:"Cormorant Garamond",Georgia,serif;--sans:"Jost",system-ui,sans-serif;
+  --ease:cubic-bezier(.22,.8,.24,1);--ease-in:cubic-bezier(.5,0,.75,0);
+  --t-fast:160ms;--t-mid:420ms;--t-slow:780ms;
+  --gut:max(16px,env(safe-area-inset-left));--max:1240px;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16120F;--fg:#F1EAE0;--muted:#B9AC9C;--line:rgba(241,234,224,.15);--accent:#CF925E;--on-accent:#16120F;--surface:#221B16;--band:#6E3A18;
+}}
+:root[data-theme="dark"]{--bg:#16120F;--fg:#F1EAE0;--muted:#B9AC9C;--line:rgba(241,234,224,.15);--accent:#CF925E;--on-accent:#16120F;--surface:#221B16;--band:#6E3A18}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:400 17px/1.6 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--fg);color:var(--bg);padding:10px 14px;z-index:100}
+.skip:focus{left:8px}
+.wrap{width:min(var(--max),100% - 2*var(--gut));margin-inline:auto}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1:focus{outline:none}
+h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.05;letter-spacing:-.01em;text-wrap:balance}
+p{text-wrap:pretty}
+
+/* ---------- header ---------- */
+.note{font-size:13px;text-align:center;padding:7px var(--gut);background:var(--surface);color:var(--muted)}
+.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.2) blur(10px);-webkit-backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.mark{font-family:var(--serif);font-size:25px;font-weight:600;letter-spacing:.2em;text-decoration:none;padding-left:.2em}
+.nav{display:flex;gap:4px;align-items:center}
+.nav a,.bag-btn{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;text-decoration:none;font-size:15px;border-radius:999px;transition:background var(--t-fast)}
+.nav a:hover,.bag-btn:hover{background:var(--surface)}
+.nav a[aria-current="page"]{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:6px;text-decoration-thickness:1.5px}
+.bag-btn b{display:inline-grid;place-items:center;min-width:22px;height:22px;margin-left:8px;border-radius:999px;background:var(--fg);color:var(--bg);font-size:12px;font-weight:500;transition:transform var(--t-mid) var(--ease)}
+.bag-btn b.bump{transform:scale(1.25)}
+.mnav{display:none}
+@media (max-width:720px){
+  .nav .nl{display:none}
+  .mnav{display:flex;position:fixed;z-index:40;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);border-radius:999px;padding:4px;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .mnav a{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;text-decoration:none;font-size:15px}
+  .mnav a[aria-current="page"]{background:var(--bg);color:var(--fg)}
+  main{padding-bottom:84px}
+}
+
+/* ---------- views ---------- */
+[data-view]{display:none}
+[data-view].on{display:block;animation:viewIn var(--t-mid) var(--ease) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- photo + fallback art ---------- */
+.ph{width:100%;height:100%;object-fit:cover}
+.art{width:100%;height:100%;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 35%,#EFE6DA,#D9CBB8)}
+.art svg{width:86%;height:auto;filter:drop-shadow(0 18px 18px rgba(40,24,12,.28))}
+.art.scene{background:linear-gradient(180deg,#9DB3BF 0%,#C9C1AE 55%,#7A5B3E 56%,#4C3624 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .art{background:radial-gradient(120% 90% at 50% 35%,#3A2E26,#221A15)}}
+:root[data-theme="dark"] .art{background:radial-gradient(120% 90% at 50% 35%,#3A2E26,#221A15)}
+
+/* patina layers: driven by --w (0 new … 1 worn in) */
+.patina-fig{position:relative;overflow:hidden;background:var(--surface);isolation:isolate}
+.patina-fig > .ph,.patina-fig > .art{position:absolute;inset:0}
+.layer{position:absolute;inset:0;pointer-events:none}
+.tint{mix-blend-mode:multiply;opacity:0;transition:opacity var(--t-mid) var(--ease),background-color var(--t-mid)}
+.age1{background:radial-gradient(70% 60% at 50% 60%,rgba(92,59,34,0) 30%,rgba(92,59,34,.85) 100%);mix-blend-mode:multiply;opacity:calc(var(--w,0)*.75)}
+.age2{background:linear-gradient(180deg,rgba(60,32,14,.0),rgba(60,32,14,.55));mix-blend-mode:multiply;opacity:calc(var(--w,0)*var(--w,0)*.9)}
+.burnish{background:radial-gradient(40% 30% at 42% 38%,rgba(255,226,180,.9),rgba(255,226,180,0) 70%);mix-blend-mode:soft-light;opacity:calc(var(--w,0)*.85)}
+
+/* ---------- shop: patina hero ---------- */
+.patina{position:relative;height:300vh}
+.stick{position:sticky;top:60px;height:calc(100vh - 60px);height:calc(100dvh - 60px);display:grid;grid-template-columns:1.05fr 1fr;align-items:center;gap:clamp(24px,5vw,72px)}
+.hero-fig{height:min(78vh,760px);border-radius:999px 999px 6px 6px;transform:scale(calc(1.06 - var(--w,0)*.06));will-change:transform}
+.hero-copy h1{font-size:clamp(52px,7.4vw,112px);font-weight:400}
+.hero-copy h1 span{display:block;overflow:hidden}
+.hero-copy h1 span i{display:block;font-style:normal;animation:rise var(--t-slow) var(--ease) both}
+.hero-copy h1 span:nth-child(2) i{animation-delay:90ms}
+.hero-copy h1 span:nth-child(3) i{animation-delay:180ms}
+@keyframes rise{from{transform:translateY(105%)}to{transform:none}}
+.lede{max-width:34ch;margin-top:22px;color:var(--muted);font-size:18px;animation:fade var(--t-slow) var(--ease) .35s both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.wear{list-style:none;padding:0;margin-top:clamp(24px,5vh,48px);position:relative;max-width:420px;animation:fade var(--t-slow) var(--ease) .5s both}
+.wear-track{height:2px;background:var(--line);position:relative;margin-bottom:18px}
+.wear-track::after{content:"";position:absolute;inset:0;background:var(--accent);transform-origin:left;transform:scaleX(var(--w,0))}
+.wear-steps{list-style:none;padding:0;display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.wear-steps li{transition:color var(--t-fast)}
+.wear-steps li.on{color:var(--fg);font-weight:500}
+.wear-say{position:relative;min-height:5.4em;margin-top:12px}
+.wear-say p{position:absolute;inset:0;font-family:var(--serif);font-size:24px;line-height:1.3;opacity:0;transform:translateY(8px);transition:opacity var(--t-mid) var(--ease),transform var(--t-mid) var(--ease)}
+.wear-say p.on{opacity:1;transform:none}
+.scroll-hint{display:inline-flex;gap:10px;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}
+.scroll-hint svg{animation:nudge 1.8s var(--ease) infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@media (max-width:860px){
+  .patina{height:260vh}
+  .stick{grid-template-columns:1fr;align-content:center;gap:18px;padding-block:12px}
+  .hero-fig{height:42dvh;width:min(100%,360px);margin-inline:auto;transform:none}
+  .hero-copy{text-align:left}
+  .hero-copy h1{font-size:clamp(40px,11vw,60px)}
+  .hero-copy h1 span{display:inline}
+  .hero-copy h1 span i{display:inline-block}
+  .lede{display:none}
+  .wear{margin-top:14px;max-width:none}
+  .wear-say{min-height:4.2em}
+  .wear-say p{font-size:20px}
+  .scroll-hint{display:none}
+}
+
+/* ---------- shop: rail ---------- */
+.rail{overflow-x:clip;padding:clamp(72px,12vh,140px) 0 40px;border-top:1px solid var(--line)}
+.rail-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap}
+.rail-head h2{font-size:clamp(36px,5vw,64px)}
+.filters{display:flex;gap:6px}
+.chip{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;font-size:15px;transition:background var(--t-fast),color var(--t-fast),border-color var(--t-fast)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.ledger{margin-top:clamp(28px,5vh,48px);display:grid;grid-template-columns:1.2fr repeat(3,1fr);border-top:1px solid var(--fg);border-bottom:1px solid var(--line)}
+.ledger > div{padding:14px 16px 16px 0}
+.ledger > div + div{padding-left:16px;border-left:1px solid var(--line)}
+.ledger dt{font-size:13px;color:var(--muted)}
+.ledger dd{font-size:16px;margin-top:2px}
+.ledger .nm dd{font-family:var(--serif);font-size:30px;line-height:1.1}
+.tag{display:inline-block;margin-left:6px;padding:1px 7px;border:1px dashed var(--accent);border-radius:999px;font-size:11.5px;color:var(--accent);vertical-align:2px;white-space:nowrap}
+.ledger.swap{animation:ledg var(--t-mid) var(--ease)}
+@keyframes ledg{from{opacity:.2}to{opacity:1}}
+@media (max-width:860px){.ledger{grid-template-columns:1fr 1fr}.ledger > div:nth-child(3){border-left:0;padding-left:0}.ledger > div:nth-child(n+3){border-top:1px solid var(--line)}}
+.stage{--gap:min(30vw,360px);position:relative;height:clamp(380px,58vh,560px);margin-top:28px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline-offset:6px}
+.stage::after{content:"";position:absolute;left:0;right:0;bottom:22px;height:1px;background:var(--line)}
+.piece{position:absolute;left:50%;bottom:22px;width:min(44vw,340px);aspect-ratio:4/5;border-radius:999px 999px 4px 4px;overflow:hidden;transform-origin:50% 100%;transition:transform var(--t-slow) var(--ease),opacity var(--t-mid) var(--ease),filter var(--t-mid);background:var(--surface);box-shadow:0 30px 40px -30px rgba(40,22,10,.55)}
+.piece[data-off="0"]{cursor:zoom-in}
+.piece:not([data-off="0"]){cursor:pointer;filter:saturate(.75)}
+.piece[hidden]{display:block;opacity:0;pointer-events:none}
+@media (max-width:720px){.stage{--gap:60vw;height:clamp(340px,52vh,460px)}.piece{width:62vw}}
+.rail-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;flex-wrap:wrap}
+.desc{max-width:52ch;font-size:18px}
+.ctl{display:flex;gap:10px;align-items:center}
+.round{width:48px;height:48px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;transition:background var(--t-fast),transform var(--t-fast)}
+.round:hover{background:var(--surface)}
+.round:active{transform:scale(.94)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:0 24px;border-radius:999px;background:var(--fg);color:var(--bg);text-decoration:none;font-size:16px;font-weight:500;transition:transform var(--t-fast),background var(--t-fast)}
+.btn:hover{background:var(--accent);color:var(--on-accent)}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:none;color:var(--fg);border:1px solid var(--fg)}
+.btn.ghost:hover{background:var(--fg);color:var(--bg)}
+.counter{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:4.5em;text-align:center}
+
+/* ticker */
+.ticker{background:var(--band);color:var(--on-band);overflow:hidden;position:relative;margin-top:clamp(56px,10vh,110px)}
+.ticker-in{display:flex;width:max-content;animation:tick 42s linear infinite}
+.ticker[data-paused="true"] .ticker-in{animation-play-state:paused}
+.ticker span{font-family:var(--serif);font-size:clamp(22px,3vw,32px);padding:14px 0;white-space:nowrap}
+.ticker span::after{content:"";display:inline-block;width:7px;height:7px;margin:0 28px;border-radius:50%;background:var(--thread);vertical-align:middle}
+@keyframes tick{to{transform:translateX(-50%)}}
+.tick-pause{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:999px;background:color-mix(in srgb,var(--band) 70%,#000);color:var(--on-band);display:grid;place-items:center}
+
+/* doors */
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,3vw,32px);padding:clamp(56px,10vh,110px) 0}
+.door{position:relative;display:grid;align-content:end;min-height:420px;border-radius:6px;overflow:hidden;color:#FBF7F1;text-decoration:none;isolation:isolate}
+.door > .ph,.door > .art{position:absolute;inset:0;z-index:-2;transition:transform 1.2s var(--ease)}
+.door::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,14,10,0) 35%,rgba(20,14,10,.78))}
+.door:hover > .ph{transform:scale(1.04)}
+.door div{padding:28px}
+.door h3{font-size:clamp(30px,3.4vw,44px)}
+.door p{margin-top:6px;max-width:36ch;opacity:.92}
+.door .go{display:inline-flex;margin-top:14px;min-height:44px;align-items:center;border-bottom:1px solid currentColor;font-weight:500}
+@media (max-width:720px){.doors{grid-template-columns:1fr}.door{min-height:340px}}
+
+/* ---------- product ---------- */
+.crumbs{padding-top:22px;font-size:14px;color:var(--muted)}
+.crumbs a{text-decoration:none;display:inline-flex;min-height:44px;align-items:center}
+.crumbs a:hover{color:var(--fg)}
+.pdp{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(24px,5vw,80px);padding-bottom:40px}
+.pdp-fig{aspect-ratio:4/5;border-radius:999px 999px 6px 6px;position:sticky;top:84px}
+.pdp-fig .fallback-note{position:absolute;left:16px;bottom:14px;font-size:12px;color:var(--muted)}
+.wear-ctl{margin-top:18px}
+.wear-ctl label{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.wear-ctl output{color:var(--fg);font-weight:500}
+input[type=range]{width:100%;margin-top:8px;accent-color:var(--accent);height:44px}
+.pdp-info h1{font-size:clamp(46px,6vw,84px);font-weight:400}
+.pdp-type{font-size:18px;color:var(--muted);margin-top:6px}
+.price{font-size:22px;margin-top:18px;font-variant-numeric:tabular-nums}
+.pdp-info .desc{margin-top:18px}
+fieldset{border:0;padding:0;margin-top:28px}
+legend{font-size:14px;color:var(--muted);margin-bottom:10px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px 0 8px;border:1px solid var(--line);border-radius:999px;font-size:15px;transition:border-color var(--t-fast)}
+.sw i{width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.sw[aria-checked="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.sizes{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px}
+.sz{min-height:48px;border:1px solid var(--line);border-radius:6px;font-variant-numeric:tabular-nums;transition:background var(--t-fast),border-color var(--t-fast)}
+.sz:hover{border-color:var(--fg)}
+.sz[aria-checked="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.field-err{color:#B3261E;font-size:14px;margin-top:8px;min-height:1.4em}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .field-err{color:#F2B8B5}}
+.buy{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+.buy .btn{flex:1 1 220px}
+.specs{margin-top:36px;border-top:1px solid var(--fg)}
+.specs div{display:grid;grid-template-columns:140px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.specs dt{color:var(--muted);font-size:15px}
+.care{margin-top:28px;color:var(--muted);font-size:16px;max-width:52ch}
+.nextup{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px 0 clamp(56px,10vh,110px);border-top:1px solid var(--line)}
+.nu{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;text-decoration:none;padding:12px;border-radius:6px;transition:background var(--t-fast)}
+.nu:hover{background:var(--surface)}
+.nu .thumb{width:96px;height:120px;border-radius:999px 999px 3px 3px;overflow:hidden;background:var(--surface)}
+.nu small{display:block;color:var(--muted);font-size:13px}
+.nu strong{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.1}
+.nu.next{text-align:right;grid-template-columns:1fr 96px}
+.nu.next .thumb{order:2}
+.nu:hover .thumb .ph{transform:scale(1.05)}
+.nu .thumb .ph{transition:transform var(--t-slow) var(--ease)}
+@media (max-width:860px){.pdp{grid-template-columns:1fr}.pdp-fig{position:relative;top:0;width:min(100%,460px);margin-inline:auto}.nextup{grid-template-columns:1fr}.nu.next{order:-1}}
+
+/* ---------- wholesale / about ---------- */
+.band-hero{position:relative;min-height:min(72vh,640px);display:grid;align-items:end;color:#FBF7F1;overflow:hidden;isolation:isolate}
+.band-hero > .ph,.band-hero > .art{position:absolute;inset:0;z-index:-2}
+.band-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(18,12,8,.1),rgba(18,12,8,.72))}
+.band-hero .wrap{padding-block:clamp(40px,8vh,80px)}
+.band-hero h1{font-size:clamp(48px,7vw,104px);font-weight:400;max-width:12ch}
+.band-hero p{margin-top:14px;max-width:46ch;font-size:19px;opacity:.94}
+.cols{display:grid;grid-template-columns:1fr 1.2fr;gap:clamp(32px,6vw,96px);padding:clamp(56px,10vh,110px) 0}
+.cols h2{font-size:clamp(34px,4vw,54px)}
+.terms{list-style:none;padding:0;margin-top:28px;border-top:1px solid var(--fg)}
+.terms li{padding:16px 0;border-bottom:1px solid var(--line)}
+.terms b{display:block;font-family:var(--serif);font-weight:500;font-size:24px}
+.terms span{color:var(--muted)}
+form .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fld{display:block;margin-top:18px}
+.fld span{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+.fld span em{font-style:normal;color:var(--accent)}
+.fld input,.fld select,.fld textarea{width:100%;min-height:50px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);font-size:16px;transition:border-color var(--t-fast)}
+.fld textarea{min-height:120px;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--fg);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.fld [aria-invalid="true"]{border-color:#B3261E}
+.form-done{padding:24px;border:1px solid var(--line);border-radius:6px;margin-top:22px}
+.form-done h3{font-size:30px}
+.hp{display:none}
+@media (max-width:860px){.cols{grid-template-columns:1fr}form .row{grid-template-columns:1fr}}
+.story{max-width:62ch;font-size:19px}
+.story p + p{margin-top:1em}
+.coast{position:relative;list-style:none;padding:0;margin-top:28px}
+.coast::before{content:"";position:absolute;left:7px;top:10px;bottom:10px;width:1px;background:var(--line)}
+.coast li{position:relative;padding:0 0 0 36px;opacity:0;transform:translateY(10px);transition:opacity var(--t-mid) var(--ease),transform var(--t-mid) var(--ease)}
+.coast.in li{opacity:1;transform:none}
+.coast li::before{content:"";position:absolute;left:2px;top:22px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--accent)}
+.coast a{display:flex;justify-content:space-between;gap:16px;align-items:baseline;min-height:56px;padding:10px 0;text-decoration:none;border-bottom:1px solid var(--line)}
+.coast a:hover strong{color:var(--accent)}
+.coast strong{font-family:var(--serif);font-weight:500;font-size:28px;transition:color var(--t-fast)}
+.coast span{color:var(--muted);font-size:15px;text-align:right}
+.wide-photo{height:min(70vh,620px);overflow:hidden;border-radius:6px;position:relative}
+.wide-photo > *{position:absolute;inset:-8% 0;height:116%}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:40px 0 28px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+footer .mark{font-size:20px;color:var(--fg)}
+footer a{text-decoration:none}
+footer a:hover{color:var(--fg)}
+footer nav{display:flex;gap:18px;flex-wrap:wrap}
+footer nav a{display:inline-flex;min-height:44px;align-items:center}
+
+/* ---------- bag drawer ---------- */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(14,10,8,.5);opacity:0;pointer-events:none;transition:opacity var(--t-mid) var(--ease)}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;z-index:61;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--bg);display:flex;flex-direction:column;transform:translateX(102%);transition:transform var(--t-mid) var(--ease);visibility:hidden}
+.drawer.on{transform:none;visibility:visible}
+.drawer:not(.on){transition:transform 280ms var(--ease-in),visibility 0s 280ms}
+.dr-head{display:flex;justify-content:space-between;align-items:center;padding:14px var(--gut) 14px 24px;border-bottom:1px solid var(--line)}
+.dr-head h2{font-size:30px}
+.dr-body{flex:1;overflow:auto;padding:8px 24px}
+.dr-foot{padding:18px 24px max(18px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.line{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.line .thumb{width:64px;height:80px;border-radius:999px 999px 3px 3px;overflow:hidden;background:var(--surface)}
+.line strong{font-family:var(--serif);font-weight:500;font-size:22px;display:block;line-height:1.1}
+.line small{color:var(--muted)}
+.line .rm{min-height:44px;padding:0 6px;color:var(--muted);text-decoration:underline;font-size:14px}
+.total{display:flex;justify-content:space-between;font-size:18px;margin-bottom:14px;font-variant-numeric:tabular-nums}
+.empty{padding:40px 0;color:var(--muted)}
+.empty .btn{margin-top:18px}
+.toast{position:fixed;z-index:70;left:50%;bottom:max(96px,calc(env(safe-area-inset-bottom) + 96px));transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:999px;font-size:15px;opacity:0;pointer-events:none;transition:opacity var(--t-mid) var(--ease),transform var(--t-mid) var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;scroll-behavior:auto!important}
+  .patina{height:auto}
+  .stick{position:relative;top:0;height:auto;padding-block:40px}
+  .hero-fig{transform:none}
+  .ticker-in{animation:none;flex-wrap:wrap;width:auto}
+  .tick-pause{display:none}
+  .coast li{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" result="n"/>
+      <feColorMatrix in="n" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .22 0" result="g"/>
+      <feComposite in="g" in2="SourceGraphic" operator="in" result="gi"/>
+      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="gi"/></feMerge>
+    </filter>
+    <linearGradient id="g-Cognac" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#B56A34"/><stop offset=".55" stop-color="#8A4A20"/><stop offset="1" stop-color="#5C2E12"/></linearGradient>
+    <linearGradient id="g-Tobacco" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#7E5232"/><stop offset=".55" stop-color="#5C3B22"/><stop offset="1" stop-color="#3A2414"/></linearGradient>
+    <linearGradient id="g-Ink" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#4A3E37"/><stop offset=".55" stop-color="#2A221E"/><stop offset="1" stop-color="#141010"/></linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".22"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E2C27E"/><stop offset=".5" stop-color="#B08A45"/><stop offset="1" stop-color="#7C5E28"/></linearGradient>
+  </defs>
+</svg>
+
+<p class="note">Preview site. Product photos are stand-ins, and orders open with the first production run.</p>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#/" aria-label="Cabrillo, shop home">CABRILLO</a>
+    <nav class="nav" aria-label="Main">
+      <a class="nl" href="#/" data-nav="shop">Shop</a>
+      <a class="nl" href="#/wholesale" data-nav="wholesale">Wholesale</a>
+      <a class="nl" href="#/about" data-nav="about">About</a>
+      <button class="bag-btn" id="bagBtn" type="button" aria-haspopup="dialog" aria-controls="drawer">Bag <b id="bagN" aria-label="items in bag">0</b></button>
+    </nav>
+  </div>
+</header>
+<nav class="mnav" aria-label="Main (mobile)">
+  <a href="#/" data-nav="shop">Shop</a>
+  <a href="#/wholesale" data-nav="wholesale">Wholesale</a>
+  <a href="#/about" data-nav="about">About</a>
+</nav>
+
+<main id="main" tabindex="-1">
+
+<!-- ================= SHOP ================= -->
+<section data-view="shop" aria-labelledby="shopTitle">
+  <div class="patina" id="patina">
+    <div class="wrap stick">
+      <figure class="patina-fig hero-fig" id="heroFig">
+        <div class="layer age1"></div><div class="layer age2"></div><div class="layer burnish"></div>
+      </figure>
+      <div class="hero-copy">
+        <h1 id="shopTitle"><span><i>Made</i></span> <span><i>to be</i></span> <span><i>worn in.</i></span></h1>
+        <p class="lede">Shoes, belts and bags designed in California. Keep scrolling to see what years of wear do to good leather.</p>
+        <div class="wear" aria-live="polite">
+          <div class="wear-track" aria-hidden="true"></div>
+          <ol class="wear-steps" id="wearSteps">
+            <li class="on">Day one</li><li>Six months</li><li>Two years</li><li>Ten years</li>
+          </ol>
+          <div class="wear-say" id="wearSay">
+            <p class="on">An even color, a matte surface and a stiff heel. It will never look this plain again.</p>
+            <p>Creases form where your foot bends, and the toe begins to darken.</p>
+            <p>The edges deepen from handling. Brushing brings up a soft shine.</p>
+            <p>A color nobody else's pair has, because nobody else walked in it.</p>
+          </div>
+          <span class="scroll-hint" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v11M2 7.5 7 12.5 12 7.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Scroll</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="rail" aria-labelledby="railTitle">
+    <div class="wrap">
+      <div class="rail-head">
+        <h2 id="railTitle">The first collection</h2>
+        <div class="filters" role="group" aria-label="Filter the collection">
+          <button class="chip" type="button" data-cat="All" aria-pressed="true">All</button>
+          <button class="chip" type="button" data-cat="Shoes" aria-pressed="false">Shoes</button>
+          <button class="chip" type="button" data-cat="Leather goods" aria-pressed="false">Leather goods</button>
+        </div>
+      </div>
+      <dl class="ledger" id="ledger"></dl>
+      <div class="stage" id="stage" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Collection. Use the left and right arrow keys to browse."></div>
+      <div class="rail-foot">
+        <p class="desc" id="railDesc"></p>
+        <div class="ctl">
+          <button class="round" id="prev" type="button" aria-label="Previous piece"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M11 3 5 9l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+          <span class="counter" id="counter" aria-live="polite"></span>
+          <button class="round" id="next" type="button" aria-label="Next piece"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="m7 3 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+          <a class="btn" id="railGo" href="#/">See details</a>
+        </div>
+      </div>
+    </div>
+    <div class="ticker" id="ticker" data-paused="false">
+      <div class="ticker-in" aria-hidden="true" id="tickerIn"></div>
+      <p class="vh">Made to be worn in. Designed in California. Same price online and in our partner stores. Free shipping and returns in the US.</p>
+      <button class="tick-pause" id="tickPause" type="button" aria-label="Pause the moving banner" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2v10M10 2v10" stroke="currentColor" stroke-width="2"/></svg></button>
+    </div>
+    <div class="wrap doors">
+      <a class="door" href="#/wholesale" data-img="UTpsWrVF49Q" data-alt="Rocky cliffs above the Pacific Ocean">
+        <div><h3>For stores</h3><p>Carry Cabrillo at the same price we sell it online. Request the line sheet.</p><span class="go">Wholesale</span></div>
+      </a>
+      <a class="door" href="#/about" data-img="-r4TKq-gEI4" data-alt="A highway along sunlit coastal cliffs">
+        <div><h3>Named for the coast</h3><p>Every style takes its name from a town between Mendocino and Point Loma.</p><span class="go">Our story</span></div>
+      </a>
+    </div>
+  </section>
+</section>
+
+<!-- ================= PRODUCT ================= -->
+<section data-view="product" aria-live="off">
+  <div class="wrap" id="pdp"></div>
+</section>
+
+<!-- ================= WHOLESALE ================= -->
+<section data-view="wholesale" aria-labelledby="wsTitle">
+  <div class="band-hero" data-img="UTpsWrVF49Q" data-alt="Rocky cliffs above the Pacific Ocean">
+    <div class="wrap">
+      <h1 id="wsTitle">Carry Cabrillo in your store</h1>
+      <p>We sell to a small number of independent menswear shops, at the same retail price you'll find on this site.</p>
+    </div>
+  </div>
+  <div class="wrap cols">
+    <div>
+      <h2>How it works</h2>
+      <ul class="terms">
+        <li><b>One retail price</b><span>Our site never undercuts your shelf. No sales, no discount codes.</span></li>
+        <li><b>A line sheet on request</b><span>Wholesale prices, opening order minimums and lead times are in the line sheet we send after this form.</span></li>
+        <li><b>Samples before you commit</b><span>We'll send samples of the pieces you're considering, so you can judge the leather in hand.</span></li>
+        <li><b>First production run</b><span>Partner stores get their opening orders before the run opens online.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Request the line sheet</h2>
+      <form name="wholesale" method="POST" data-netlify="true" netlify-honeypot="company_url" id="wsForm" novalidate>
+        <input type="hidden" name="form-name" value="wholesale">
+        <p class="hp"><label>Leave this empty <input name="company_url" tabindex="-1" autocomplete="off"></label></p>
+        <div class="row">
+          <label class="fld"><span>Your name <em aria-hidden="true">*</em></span><input name="name" autocomplete="name" required aria-describedby="e-name"></label>
+          <label class="fld"><span>Store name <em aria-hidden="true">*</em></span><input name="store" autocomplete="organization" required aria-describedby="e-store"></label>
+        </div>
+        <p class="field-err" id="e-name" aria-live="polite"></p>
+        <div class="row">
+          <label class="fld"><span>Work email <em aria-hidden="true">*</em></span><input name="email" type="email" autocomplete="email" required aria-describedby="e-email"></label>
+          <label class="fld"><span>City and state</span><input name="city" autocomplete="address-level2"></label>
+        </div>
+        <p class="field-err" id="e-email" aria-live="polite"></p>
+        <div class="row">
+          <label class="fld"><span>Store website or Instagram</span><input name="website" inputmode="url"></label>
+          <label class="fld"><span>What would you carry?</span>
+            <select name="interest"><option>Shoes and leather goods</option><option>Shoes only</option><option>Leather goods only</option><option>Not sure yet</option></select>
+          </label>
+        </div>
+        <label class="fld"><span>Anything we should know</span><textarea name="message" placeholder="Doors, customers, brands you already carry"></textarea></label>
+        <p class="field-err" id="e-store" aria-live="polite"></p>
+        <button class="btn" type="submit" style="margin-top:10px">Request the line sheet</button>
+      </form>
+      <div class="form-done" id="wsDone" hidden tabindex="-1">
+        <h3>Request received</h3>
+        <p>We'll email the line sheet to you within two business days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section data-view="about" aria-labelledby="abTitle">
+  <div class="band-hero" data-img="-r4TKq-gEI4" data-alt="A highway along sunlit coastal cliffs">
+    <div class="wrap">
+      <h1 id="abTitle">Designed in California. Named for its coast.</h1>
+    </div>
+  </div>
+  <div class="wrap cols">
+    <div class="story">
+      <p>Cabrillo started with a simple complaint: good leather shoes cost too much at the department store, and cheaper ones look tired within a season.</p>
+      <p>We design a short collection of shoes, belts and bags meant to get better with use. The leather darkens, softens and creases to your shape. The point is the pair you have in five years, not the pair in the box.</p>
+      <p>The collection is designed in California. We're choosing our workshop now, and we'll name it here, with photos, once the first run is made.</p>
+      <p><a class="btn ghost" href="#/" style="margin-top:12px">See the collection</a></p>
+    </div>
+    <div>
+      <h2>From Mendocino to Point Loma</h2>
+      <ol class="coast" id="coast"></ol>
+    </div>
+  </div>
+  <div class="wrap" style="padding-bottom:clamp(56px,10vh,110px)">
+    <div class="wide-photo" id="widePhoto" data-img="LTbr4muSCRU" data-alt="Morning haze over the Big Sur coastline"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a class="mark" href="#/">CABRILLO</a>
+      <p style="margin-top:6px">Made to be worn in. Designed in California.</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="#/">Shop</a><a href="#/wholesale">Wholesale</a><a href="#/about">About</a>
+    </nav>
+    <p style="flex-basis:100%">Stand-in photography from Unsplash. Product details marked "To confirm" will be finalized with our workshop. © 2026 Cabrillo.</p>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
+  <div class="dr-head">
+    <h2 id="bagTitle">Your bag</h2>
+    <button class="round" id="bagClose" type="button" aria-label="Close bag"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13" stroke="currentColor" stroke-width="1.6"/></svg></button>
+  </div>
+  <div class="dr-body" id="bagBody"></div>
+  <div class="dr-foot" id="bagFoot">
+    <div class="total"><span>Total</span><span id="bagTotal">USD 0</span></div>
+    <button class="btn" id="checkout" type="button" style="width:100%">Check out</button>
+    <form name="launch-list" method="POST" data-netlify="true" netlify-honeypot="company_url" id="listForm" hidden novalidate>
+      <input type="hidden" name="form-name" value="launch-list">
+      <input type="hidden" name="bag" id="listBag">
+      <p class="hp"><label>Leave this empty <input name="company_url" tabindex="-1" autocomplete="off"></label></p>
+      <p style="font-size:15px">Orders open with our first production run. Leave your email and we'll write once, when your pieces can ship. Your bag is saved on this device.</p>
+      <label class="fld"><span>Email <em aria-hidden="true">*</em></span><input name="email" type="email" autocomplete="email" required aria-describedby="e-list"></label>
+      <p class="field-err" id="e-list" aria-live="polite"></p>
+      <button class="btn" type="submit" style="width:100%">Email me when orders open</button>
+    </form>
+    <p id="listDone" hidden tabindex="-1" style="padding:8px 0">You're on the list. We'll email you when orders open.</p>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const FIN = { Cognac: "#8A4A20", Tobacco: "#5C3B22", Ink: "#1A1614" };
+const STITCH = "#E9D3B4";
+const ART = {
+  oxford: f => `<svg viewBox="0 0 420 190" aria-hidden="true"><g filter="url(#grain)"><path d="M28 150 L392 150 Q396 162 384 166 L40 166 Q26 166 28 154 Z" fill="#231A15"/><rect x="30" y="148" width="74" height="22" rx="2" fill="#2E231D"/><path d="M32 150 C30 116 48 100 86 96 L160 86 C186 82 204 62 218 46 L268 42 C280 70 314 88 354 102 C380 112 392 128 392 150 Z" fill="url(#g-${f})"/><path d="M150 88 C172 84 190 70 204 54 L262 50 C258 70 250 84 236 96 C210 104 178 102 150 88 Z" fill="#000" fill-opacity=".14"/></g><path d="M46 140 C46 118 60 108 92 104 L162 94 C190 90 208 70 222 54" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M206 58 l14 10 M214 52 l14 10 M222 47 l14 10" stroke="#120D0A" stroke-width="2.4" stroke-linecap="round"/><path d="M60 110 C140 92 240 60 360 110" fill="none" stroke="url(#sheen)" stroke-width="18" stroke-linecap="round" opacity=".7"/></svg>`,
+  derby: f => `<svg viewBox="0 0 420 190" aria-hidden="true"><g filter="url(#grain)"><path d="M28 150 L392 150 Q396 162 384 166 L40 166 Q26 166 28 154 Z" fill="#231A15"/><rect x="30" y="148" width="74" height="22" rx="2" fill="#2E231D"/><path d="M32 150 C30 112 50 96 90 92 L170 82 C196 78 210 58 222 42 L272 40 C288 70 320 90 358 104 C384 114 394 130 394 150 Z" fill="url(#g-${f})"/><path d="M150 96 C190 92 214 74 232 46 L262 44 C258 78 228 102 186 108 Z" fill="#000" fill-opacity=".16"/></g><path d="M150 96 C190 92 214 74 232 46" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M212 60 l16 6 M218 53 l16 6 M224 46 l16 6" stroke="#120D0A" stroke-width="2.4" stroke-linecap="round"/><path d="M60 110 C140 92 240 60 360 110" fill="none" stroke="url(#sheen)" stroke-width="18" stroke-linecap="round" opacity=".7"/></svg>`,
+  loafer: f => `<svg viewBox="0 0 420 190" aria-hidden="true"><g filter="url(#grain)"><path d="M28 150 L392 150 Q396 162 384 166 L40 166 Q26 166 28 154 Z" fill="#231A15"/><rect x="30" y="148" width="70" height="20" rx="2" fill="#2E231D"/><path d="M32 150 C30 120 46 106 84 104 L190 98 C214 96 232 84 250 74 C292 78 330 90 362 108 C386 120 394 134 394 150 Z" fill="url(#g-${f})"/><path d="M196 102 C228 100 256 92 286 84 L300 104 C266 112 230 116 200 116 Z" fill="#000" fill-opacity=".18"/></g><path d="M196 102 C228 100 256 92 286 84" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><ellipse cx="244" cy="106" rx="14" ry="4" fill="#120D0A" opacity=".55"/><path d="M60 116 C150 100 250 84 360 116" fill="none" stroke="url(#sheen)" stroke-width="16" stroke-linecap="round" opacity=".7"/></svg>`,
+  boot: f => `<svg viewBox="0 0 420 230" aria-hidden="true"><g filter="url(#grain)"><path d="M28 190 L392 190 Q396 204 384 208 L40 208 Q26 208 28 196 Z" fill="#1B1410"/><rect x="30" y="188" width="80" height="24" rx="2" fill="#241B16"/><path d="M34 190 L40 40 C40 30 48 24 58 24 L168 24 C178 24 184 30 184 40 L188 96 C210 110 250 124 300 134 C352 146 392 162 394 190 Z" fill="url(#g-${f})"/><path d="M184 40 L188 96 C176 104 160 108 140 106 L136 40 Z" fill="#000" fill-opacity=".16"/></g><path d="M50 186 L56 44 M176 40 L180 98 C210 116 260 130 320 142" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M140 44 h40 M140 60 h41 M140 76 h42 M141 92 h42" stroke="#120D0A" stroke-width="2.4" stroke-linecap="round"/><path d="M60 60 C70 120 200 140 360 160" fill="none" stroke="url(#sheen)" stroke-width="18" stroke-linecap="round" opacity=".6"/></svg>`,
+  bifold: f => `<svg viewBox="0 0 420 220" aria-hidden="true"><g filter="url(#grain)"><rect x="70" y="30" width="280" height="170" rx="10" fill="url(#g-${f})"/><rect x="70" y="30" width="280" height="40" rx="10" fill="#000" fill-opacity=".1"/></g><rect x="82" y="42" width="256" height="146" rx="6" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M210 30 V200" stroke="#000" stroke-opacity=".25" stroke-width="2"/><path d="M90 60 C180 40 260 50 340 90" fill="none" stroke="url(#sheen)" stroke-width="22" stroke-linecap="round" opacity=".6"/></svg>`,
+  cardholder: f => `<svg viewBox="0 0 420 220" aria-hidden="true"><g filter="url(#grain)"><rect x="110" y="40" width="200" height="150" rx="8" fill="url(#g-${f})"/><path d="M110 90 Q210 110 310 90 V182 a8 8 0 0 1 -8 8 H118 a8 8 0 0 1 -8 -8 Z" fill="#000" fill-opacity=".14"/></g><rect x="120" y="50" width="180" height="130" rx="5" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><path d="M150 70 h120" stroke="#000" stroke-opacity=".3" stroke-width="3" stroke-linecap="round"/><path d="M120 70 C190 55 250 60 300 90" fill="none" stroke="url(#sheen)" stroke-width="18" stroke-linecap="round" opacity=".6"/></svg>`,
+  briefcase: f => `<svg viewBox="0 0 420 260" aria-hidden="true"><g filter="url(#grain)"><path d="M170 60 V40 a12 12 0 0 1 12 -12 h56 a12 12 0 0 1 12 12 V60" fill="none" stroke="url(#g-${f})" stroke-width="12"/><rect x="40" y="60" width="340" height="180" rx="10" fill="url(#g-${f})"/><path d="M40 70 a10 10 0 0 1 10 -10 h320 a10 10 0 0 1 10 10 V130 H40 Z" fill="#000" fill-opacity=".12"/></g><path d="M52 130 H368" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><rect x="52" y="72" width="316" height="156" rx="6" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4" opacity=".7"/><rect x="196" y="120" width="28" height="22" rx="3" fill="url(#brass)"/><path d="M60 100 C160 76 280 84 370 140" fill="none" stroke="url(#sheen)" stroke-width="24" stroke-linecap="round" opacity=".55"/></svg>`,
+  weekender: f => `<svg viewBox="0 0 420 240" aria-hidden="true"><g filter="url(#grain)"><path d="M140 80 C140 30 280 30 280 80" fill="none" stroke="url(#g-${f})" stroke-width="12"/><path d="M30 140 C30 92 70 76 120 76 H300 C350 76 390 92 390 140 V206 a12 12 0 0 1 -12 12 H42 a12 12 0 0 1 -12 -12 Z" fill="url(#g-${f})"/><path d="M30 140 C30 92 70 76 120 76 H300 C350 76 390 92 390 140 Z" fill="#000" fill-opacity=".1"/></g><path d="M44 132 C60 98 90 90 124 90 H296 C330 90 360 98 376 132" fill="none" stroke="${STITCH}" stroke-width="1.6" stroke-dasharray="4 4"/><rect x="128" y="82" width="12" height="16" rx="2" fill="url(#brass)"/><rect x="280" y="82" width="12" height="16" rx="2" fill="url(#brass)"/><path d="M60 130 C160 100 280 104 370 150" fill="none" stroke="url(#sheen)" stroke-width="24" stroke-linecap="round" opacity=".55"/></svg>`,
+  belt: f => `<svg viewBox="0 0 420 220" aria-hidden="true"><g filter="url(#grain)"><ellipse cx="210" cy="118" rx="150" ry="74" fill="none" stroke="url(#g-${f})" stroke-width="34"/><ellipse cx="210" cy="118" rx="104" ry="48" fill="none" stroke="url(#g-${f})" stroke-width="30"/></g><ellipse cx="210" cy="118" rx="150" ry="74" fill="none" stroke="${STITCH}" stroke-width="1.2" stroke-dasharray="4 4" opacity=".7"/><rect x="320" y="94" width="40" height="50" rx="6" fill="none" stroke="url(#brass)" stroke-width="7"/><path d="M340 98 V140" stroke="url(#brass)" stroke-width="4"/><path d="M80 92 C150 54 270 54 340 92" fill="none" stroke="url(#sheen)" stroke-width="20" stroke-linecap="round" opacity=".6"/></svg>`,
+  reversible: f => ART.belt(f).replace(/url\(#g-[A-Za-z]+\)/, "url(#g-Ink)")
+};
+// img = Unsplash photo id (stand-in photography). town = place the style is named for.
+const P = [
+  { id: "pointloma", name: "Point Loma", type: "Oxford", cat: "Shoes", art: "oxford", price: 345, img: "6V-vJpPzvh8", alt: "Hands holding a pair of brown leather shoes", town: "Point Loma, San Diego", desc: "A plain-toe oxford sharp enough for a suit and easy enough for denim.", spec: [["Construction", "Blake-stitched", 1], ["Upper", "Full-grain calfskin", 1], ["Sizes", "US 7 to 13", 0]] },
+  { id: "pescadero", name: "Pescadero", type: "Derby", cat: "Shoes", art: "derby", price: 325, img: "xhthZII8yoE", alt: "A man wearing brown leather shoes", town: "Pescadero, San Mateo County", desc: "An open-laced derby with a slightly wider toe for all-day comfort.", spec: [["Construction", "Blake-stitched", 1], ["Upper", "Full-grain calfskin", 1], ["Sizes", "US 7 to 13", 0]] },
+  { id: "laguna", name: "Laguna", type: "Penny loafer", cat: "Shoes", art: "loafer", price: 295, img: "erHlzWCN6zQ", alt: "A pair of brown leather loafers", town: "Laguna Beach, Orange County", desc: "An unlined loafer that softens into the shape of your foot within a week.", spec: [["Construction", "Blake-stitched", 1], ["Lining", "Unlined", 0], ["Sizes", "US 7 to 13", 0]] },
+  { id: "bigsur", name: "Big Sur", type: "Boot", cat: "Shoes", art: "boot", price: 425, img: "wH63OABrR4E", alt: "Brown leather lace-up boots", town: "Big Sur, Monterey County", desc: "A chukka-height boot for wet streets and long weekends, built to be resoled.", spec: [["Construction", "Goodyear-welted", 1], ["Sole", "Rubber commando", 1], ["Sizes", "US 7 to 13", 0]] },
+  { id: "monterey", name: "Monterey", type: "Briefcase", cat: "Leather goods", art: "briefcase", price: 495, img: "CEQC-Th5ZkE", alt: "A brown leather briefcase", town: "Monterey", desc: "A slim briefcase for a 15-inch laptop, a notebook and the day's papers.", spec: [["Hardware", "Solid brass", 1], ["Fits", "15-inch laptop", 0], ["Strap", "Detachable shoulder strap", 0]] },
+  { id: "halfmoon", name: "Half Moon", type: "Weekender", cat: "Leather goods", art: "weekender", price: 545, img: "B-OOn5a5ZSE", alt: "A brown leather travel bag", town: "Half Moon Bay", desc: "Two nights of clothes and a pair of shoes in a separate compartment.", spec: [["Hardware", "Solid brass", 1], ["Capacity", "Two nights", 0], ["Shoe pocket", "Separate, ventilated", 0]] },
+  { id: "carmel", name: "Carmel", type: "Bifold", cat: "Leather goods", art: "bifold", price: 95, img: "chB-ff0cgCU", alt: "A brown leather bifold wallet", town: "Carmel-by-the-Sea", desc: "Six cards and folded bills, thin enough for a front pocket.", spec: [["Edges", "Hand-burnished", 1], ["Capacity", "6 cards and bills", 0], ["Size", "4.3 × 3.5 in", 1]] },
+  { id: "mendocino", name: "Mendocino", type: "Card holder", cat: "Leather goods", art: "cardholder", price: 65, img: "AN3qsgpgb7w", alt: "A brown leather wallet on a black background", town: "Mendocino", desc: "Four cards and a center pocket. Nothing else.", spec: [["Edges", "Hand-burnished", 1], ["Capacity", "4 cards and a center pocket", 0], ["Size", "4 × 3 in", 1]] },
+  { id: "pacifica", name: "Pacifica", type: "Belt", cat: "Leather goods", art: "belt", price: 85, img: "KAx7H0jxo28", alt: "A brown leather belt with a metal buckle", town: "Pacifica", desc: "A 1.25-inch dress belt made to match every Cabrillo shoe in the same finish.", spec: [["Buckle", "Solid brass", 1], ["Width", "1.25 in", 0], ["Sizes", "30 to 42", 0]] },
+  { id: "cambria", name: "Cambria", type: "Reversible belt", cat: "Leather goods", art: "reversible", price: 110, img: "KAx7H0jxo28", alt: "A brown leather belt with a metal buckle", town: "Cambria, San Luis Obispo County", desc: "Your finish on one side, Ink on the other. One belt for a week of shoes.", spec: [["Buckle", "Solid brass, rotating", 1], ["Width", "1.25 in", 0], ["Sizes", "30 to 42", 0]] }
+];
+const COAST = ["mendocino", "pacifica", "halfmoon", "pescadero", "monterey", "carmel", "bigsur", "cambria", "laguna", "pointloma"];
+const SHOE = ["7","7.5","8","8.5","9","9.5","10","10.5","11","11.5","12","13"], BELT = ["30","32","34","36","38","40","42"];
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const money = n => "USD " + n.toLocaleString("en-US");
+const pad = n => String(n).padStart(2, "0");
+const byId = id => P.find(p => p.id === id);
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+/* ---------- photos: Unsplash stand-ins, with a drawn fallback if a photo can't load ---------- */
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+const src = (id, w) => `https://unsplash.com/photos/${id}/download?w=${Math.round(w * dpr / 100) * 100}`;
+function photo(id, alt, w, opts = {}) {
+  const art = opts.art ? ` data-art="${opts.art}" data-fin="${opts.fin || "Cognac"}"` : "";
+  return `<img class="ph" src="${src(id, w)}" alt="${esc(alt)}"${art} ${opts.eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="photoFail(this)">`;
+}
+function artEl(kind, fin, label) {
+  const d = document.createElement("div");
+  d.className = "art" + (kind ? "" : " scene");
+  d.setAttribute("role", "img");
+  d.setAttribute("aria-label", label || "");
+  if (kind) { d.dataset.art = kind; d.innerHTML = ART[kind](fin || "Cognac"); }
+  return d;
+}
+window.photoFail = img => img.replaceWith(artEl(img.dataset.art, img.dataset.fin, img.alt));
+function fillBg(el, w) {
+  if (el.dataset.filled) return;
+  el.dataset.filled = 1;
+  el.insertAdjacentHTML("afterbegin", photo(el.dataset.img, el.dataset.alt, w));
+}
+
+/* ---------- router ---------- */
+const views = { shop: $('[data-view="shop"]'), product: $('[data-view="product"]'), wholesale: $('[data-view="wholesale"]'), about: $('[data-view="about"]') };
+const TITLES = { shop: "Cabrillo", wholesale: "Wholesale · Cabrillo", about: "About · Cabrillo" };
+let current = null;
+function route() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const [name, arg] = h.split("/");
+  let view = "shop";
+  if (name === "p" && byId(arg)) view = "product";
+  else if (views[name]) view = name;
+  const changed = view !== current || view === "product";
+  if (view === "product") renderProduct(byId(arg));
+  if (view === "wholesale") fillBg($(".band-hero", views.wholesale), 1600);
+  if (view === "about") { fillBg($(".band-hero", views.about), 1600); fillBg($("#widePhoto"), 1400); buildCoast(); }
+  if (changed) {
+    Object.entries(views).forEach(([k, el]) => el.classList.toggle("on", k === view));
+    $$("[data-nav]").forEach(a => { if (a.dataset.nav === (view === "product" ? "shop" : view)) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    document.title = view === "product" ? `${byId(arg).name} ${byId(arg).type} · Cabrillo` : TITLES[view];
+    if (current !== null) {
+      window.scrollTo(0, 0);
+      const h1 = $("h1", views[view]);
+      if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+    }
+    current = view;
+  }
+  onScroll();
+}
+addEventListener("hashchange", route);
+
+/* ---------- patina hero (scroll-linked, transform/opacity only) ---------- */
+const patina = $("#patina"), heroFig = $("#heroFig");
+heroFig.insertAdjacentHTML("afterbegin", photo("OfvV-jkgrfQ", "A man wearing a pair of brown leather shoes", 900, { art: "oxford", eager: true }));
+const steps = $$("#wearSteps li"), says = $$("#wearSay p");
+let stage = -1, ticking = false;
+function onScroll() {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    if (current === "shop" && !reduced.matches) {
+      const r = patina.getBoundingClientRect();
+      const span = patina.offsetHeight - innerHeight * .9;
+      const w = Math.min(1, Math.max(0, -r.top / span));
+      patina.style.setProperty("--w", w.toFixed(3));
+      setStage(Math.min(3, Math.floor(w * 4)));
+    }
+    parallax();
+  });
+}
+function setStage(s) {
+  if (s === stage) return;
+  stage = s;
+  steps.forEach((li, i) => li.classList.toggle("on", i === s));
+  says.forEach((p, i) => p.classList.toggle("on", i === s));
+}
+function staticPatina() { if (reduced.matches) { patina.style.setProperty("--w", ".55"); steps.forEach(li => li.classList.add("on")); says.forEach((p, i) => p.classList.toggle("on", i === 3)); } }
+addEventListener("scroll", onScroll, { passive: true });
+addEventListener("resize", onScroll, { passive: true });
+reduced.addEventListener?.("change", () => { staticPatina(); onScroll(); });
+
+/* ---------- rail ---------- */
+const stageEl = $("#stage");
+let list = P.slice(), active = 0;
+function buildRail() {
+  stageEl.innerHTML = list.map((p, i) => `<div class="piece" data-i="${i}" role="group" aria-roledescription="slide" aria-label="${esc(p.name)} ${esc(p.type)}">${photo(p.img, p.alt, 400, { art: p.art })}</div>`).join("");
+  layout(true);
+}
+function layout(first) {
+  const n = list.length;
+  $$(".piece", stageEl).forEach(el => {
+    const i = +el.dataset.i;
+    let off = i - active;
+    if (off > n / 2) off -= n;
+    if (off < -n / 2) off += n;
+    const a = Math.abs(off);
+    el.dataset.off = off;
+    el.hidden = a > 1;
+    el.setAttribute("aria-hidden", a === 0 ? "false" : "true");
+    const s = a === 0 ? 1 : a === 1 ? .6 : .4;
+    el.style.transform = `translateX(calc(-50% + ${off} * var(--gap))) scale(${s})`;
+    el.style.opacity = a === 0 ? 1 : a === 1 ? .78 : 0;
+    el.style.zIndex = 10 - a;
+  });
+  const p = list[active];
+  const L = $("#ledger");
+  L.innerHTML = `<div class="nm"><dt>${esc(p.type)}</dt><dd>${esc(p.name)}</dd></div>` +
+    p.spec.slice(0, 2).map(([k, v, c]) => `<div><dt>${k}</dt><dd>${esc(v)}${c ? '<span class="tag">To confirm</span>' : ""}</dd></div>`).join("") +
+    `<div><dt>Price</dt><dd>${money(p.price)}</dd></div>`;
+  if (!first) { L.classList.remove("swap"); void L.offsetWidth; L.classList.add("swap"); }
+  $("#railDesc").textContent = p.desc;
+  $("#counter").textContent = `${pad(active + 1)} / ${pad(n)}`;
+  $("#railGo").href = `#/p/${p.id}`;
+  $("#railGo").textContent = `See the ${p.name}`;
+}
+const go = i => { active = (i + list.length) % list.length; layout(); };
+$("#prev").onclick = () => go(active - 1);
+$("#next").onclick = () => go(active + 1);
+stageEl.addEventListener("click", e => {
+  const el = e.target.closest(".piece");
+  if (!el || moved) return;
+  const off = +el.dataset.off;
+  if (off === 0) location.hash = `#/p/${list[active].id}`;
+  else go(active + off);
+});
+stageEl.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") { e.preventDefault(); go(active + 1); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); go(active - 1); }
+  if (e.key === "Enter") location.hash = `#/p/${list[active].id}`;
+});
+let sx = null, moved = false;
+stageEl.addEventListener("pointerdown", e => { sx = e.clientX; moved = false; });
+stageEl.addEventListener("pointermove", e => { if (sx !== null && Math.abs(e.clientX - sx) > 10) moved = true; });
+stageEl.addEventListener("pointerup", e => {
+  if (sx === null) return;
+  const dx = e.clientX - sx; sx = null;
+  if (Math.abs(dx) > 40) go(active + (dx < 0 ? 1 : -1));
+  setTimeout(() => moved = false, 0);
+});
+stageEl.addEventListener("pointercancel", () => { sx = null; });
+$$(".chip").forEach(b => b.onclick = () => {
+  $$(".chip").forEach(c => c.setAttribute("aria-pressed", c === b ? "true" : "false"));
+  list = b.dataset.cat === "All" ? P.slice() : P.filter(p => p.cat === b.dataset.cat);
+  active = 0; buildRail();
+});
+
+/* ticker */
+const TICK = ["Made to be worn in", "Designed in California", "Same price online and in our partner stores", "Free shipping and returns in the US"];
+$("#tickerIn").innerHTML = [...TICK, ...TICK].map(t => `<span>${t}</span>`).join("");
+$("#tickPause").onclick = e => {
+  const t = $("#ticker"), on = t.dataset.paused !== "true";
+  t.dataset.paused = on; e.currentTarget.setAttribute("aria-pressed", on);
+  e.currentTarget.setAttribute("aria-label", on ? "Play the moving banner" : "Pause the moving banner");
+  e.currentTarget.innerHTML = on ? '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 2l9 5-9 5z" fill="currentColor"/></svg>' : '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2v10M10 2v10" stroke="currentColor" stroke-width="2"/></svg>';
+};
+$$(".door").forEach(d => fillBg(d, 900));
+
+/* ---------- product page ---------- */
+let pd = null;
+function renderProduct(p) {
+  const i = P.indexOf(p), prev = P[(i - 1 + P.length) % P.length], next = P[(i + 1) % P.length];
+  const sizes = p.cat === "Shoes" ? SHOE : p.art === "belt" || p.art === "reversible" ? BELT : null;
+  pd = { p, finish: "Cognac", size: null, sizes };
+  $("#pdp").innerHTML = `
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Shop</a> / <span>${p.cat}</span> / <span aria-current="page">${esc(p.name)}</span></nav>
+    <div class="pdp">
+      <div>
+        <figure class="patina-fig pdp-fig" id="pdFig" style="--w:0">
+          ${photo(p.img, p.alt, 800, { art: p.art, eager: true })}
+          <div class="layer tint" id="pdTint"></div>
+          <div class="layer age1"></div><div class="layer age2"></div><div class="layer burnish"></div>
+        </figure>
+        <div class="wear-ctl">
+          <label for="pdWear"><span>See it worn in</span><output id="pdWearOut" for="pdWear">New</output></label>
+          <input type="range" id="pdWear" min="0" max="3" step="1" value="0" aria-valuetext="New">
+        </div>
+      </div>
+      <div class="pdp-info">
+        <h1>${esc(p.name)}</h1>
+        <p class="pdp-type">${esc(p.type)}</p>
+        <p class="price">${money(p.price)}</p>
+        <p class="desc">${esc(p.desc)}</p>
+        <fieldset><legend>Finish: <span id="finName">Cognac</span></legend>
+          <div class="swatches" role="radiogroup" aria-label="Finish">
+            ${Object.entries(FIN).map(([k, v]) => `<button type="button" class="sw" role="radio" aria-checked="${k === "Cognac"}" data-f="${k}"><i style="background:${v}"></i>${k}</button>`).join("")}
+          </div>
+          <p style="font-size:13px;color:var(--muted);margin-top:8px">Finish preview on the photo is approximate.</p>
+        </fieldset>
+        ${sizes ? `<fieldset><legend>${p.cat === "Shoes" ? "US size" : "Waist size (inches)"}</legend>
+          <div class="sizes" role="radiogroup" aria-label="Size" aria-describedby="sizeErr">${sizes.map(s => `<button type="button" class="sz" role="radio" aria-checked="false" data-s="${s}">${s}</button>`).join("")}</div>
+          <p class="field-err" id="sizeErr" aria-live="polite"></p></fieldset>` : ""}
+        <div class="buy"><button class="btn" id="addBag" type="button">Add to bag · ${money(p.price)}</button></div>
+        <p style="font-size:14px;color:var(--muted);margin-top:12px">Free shipping and returns in the US.</p>
+        <dl class="specs">
+          ${p.spec.map(([k, v, c]) => `<div><dt>${k}</dt><dd>${esc(v)}${c ? '<span class="tag">To confirm</span>' : ""}</dd></div>`).join("")}
+          <div><dt>Named for</dt><dd>${esc(p.town)}</dd></div>
+        </dl>
+        <p class="care">Care: brush after wearing, condition every few months, and give leather a day off between wears. It will darken and soften; that is the point.</p>
+      </div>
+    </div>
+    <nav class="nextup" aria-label="More from the collection">
+      <a class="nu" href="#/p/${prev.id}"><span class="thumb">${photo(prev.img, "", 200, { art: prev.art })}</span><span><small>Previous</small><strong>${esc(prev.name)}</strong> <small>${esc(prev.type)} · ${money(prev.price)}</small></span></a>
+      <a class="nu next" href="#/p/${next.id}"><span class="thumb">${photo(next.img, "", 200, { art: next.art })}</span><span><small>Next</small><strong>${esc(next.name)}</strong> <small>${esc(next.type)} · ${money(next.price)}</small></span></a>
+    </nav>`;
+  const WEAR = ["New", "Six months", "Two years", "Ten years"];
+  $("#pdWear").oninput = e => {
+    const v = +e.target.value;
+    $("#pdFig").style.setProperty("--w", (v / 3).toFixed(2));
+    $("#pdWearOut").textContent = WEAR[v];
+    e.target.setAttribute("aria-valuetext", WEAR[v]);
+  };
+  $$(".sw").forEach(b => b.onclick = () => {
+    pd.finish = b.dataset.f;
+    $$(".sw").forEach(x => x.setAttribute("aria-checked", x === b));
+    $("#finName").textContent = pd.finish;
+    const art = $("#pdFig .art");
+    if (art) art.innerHTML = ART[p.art](pd.finish);
+    const t = $("#pdTint");
+    t.style.backgroundColor = FIN[pd.finish];
+    t.style.opacity = pd.finish === "Cognac" ? 0 : pd.finish === "Tobacco" ? .35 : .62;
+  });
+  $$(".sz").forEach(b => b.onclick = () => {
+    pd.size = b.dataset.s;
+    $$(".sz").forEach(x => x.setAttribute("aria-checked", x === b));
+    $("#sizeErr").textContent = "";
+  });
+  $("#addBag").onclick = () => {
+    if (pd.sizes && !pd.size) { $("#sizeErr").textContent = "Choose a size to add this to your bag."; $(".sz").focus(); return; }
+    addToBag({ id: p.id, finish: pd.finish, size: pd.size });
+  };
+}
+
+/* ---------- about: coastline ---------- */
+function buildCoast() {
+  const ol = $("#coast");
+  if (ol.children.length) return;
+  ol.innerHTML = COAST.map(byId).map((p, i) => `<li style="transition-delay:${i * 45}ms"><a href="#/p/${p.id}"><strong>${esc(p.name)}</strong><span>${esc(p.town)}<br>${esc(p.type)}</span></a></li>`).join("");
+  if (reduced.matches || !("IntersectionObserver" in window)) { ol.classList.add("in"); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { ol.classList.add("in"); io.disconnect(); } }), { threshold: .15 });
+  io.observe(ol);
+}
+function parallax() {
+  if (current !== "about" || reduced.matches) return;
+  const wp = $("#widePhoto"), el = wp.firstElementChild;
+  if (!el) return;
+  const r = wp.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > innerHeight) return;
+  const t = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+  el.style.transform = `translateY(${(t * -6).toFixed(2)}%)`;
+}
+
+/* ---------- bag ---------- */
+let bag = store.get("cabrillo_bag", []);
+const scrim = $("#scrim"), drawer = $("#drawer");
+let lastFocus = null;
+function saveBag() { store.set("cabrillo_bag", bag); drawBag(); }
+function addToBag(item) {
+  const hit = bag.find(b => b.id === item.id && b.finish === item.finish && b.size === item.size);
+  if (hit) hit.qty++; else bag.push({ ...item, qty: 1 });
+  saveBag();
+  const n = $("#bagN"); n.classList.add("bump"); setTimeout(() => n.classList.remove("bump"), 220);
+  toast(`${byId(item.id).name} added to your bag`);
+}
+function drawBag() {
+  const count = bag.reduce((s, b) => s + b.qty, 0);
+  $("#bagN").textContent = count;
+  $("#bagN").setAttribute("aria-label", `${count} ${count === 1 ? "item" : "items"} in bag`);
+  const total = bag.reduce((s, b) => s + byId(b.id).price * b.qty, 0);
+  $("#bagTotal").textContent = money(total);
+  $("#bagFoot").hidden = !bag.length;
+  $("#bagBody").innerHTML = bag.length ? bag.map((b, i) => {
+    const p = byId(b.id);
+    return `<div class="line"><span class="thumb">${photo(p.img, "", 160, { art: p.art, fin: b.finish })}</span>
+      <div><strong>${esc(p.name)}</strong><small>${esc(p.type)} · ${b.finish}${b.size ? " · " + b.size : ""}${b.qty > 1 ? " · ×" + b.qty : ""}</small><br><small>${money(p.price * b.qty)}</small></div>
+      <button class="rm" type="button" data-rm="${i}" aria-label="Remove ${esc(p.name)} from bag">Remove</button></div>`;
+  }).join("") : `<div class="empty"><p>Your bag is empty.</p><a class="btn ghost" href="#/" data-close>Browse the collection</a></div>`;
+}
+$("#bagBody").addEventListener("click", e => {
+  const rm = e.target.closest("[data-rm]");
+  if (rm) { bag.splice(+rm.dataset.rm, 1); saveBag(); $("#bagClose").focus(); }
+  if (e.target.closest("[data-close]")) closeBag();
+});
+function openBag() {
+  $("#toast").classList.remove("on");
+  lastFocus = document.activeElement;
+  drawBag();
+  scrim.classList.add("on"); drawer.classList.add("on");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("#bagClose").focus(), 50);
+}
+function closeBag() {
+  scrim.classList.remove("on"); drawer.classList.remove("on");
+  document.body.style.overflow = "";
+  lastFocus?.focus?.();
+}
+$("#bagBtn").onclick = openBag;
+$("#bagClose").onclick = closeBag;
+scrim.onclick = closeBag;
+addEventListener("keydown", e => {
+  if (!drawer.classList.contains("on")) return;
+  if (e.key === "Escape") closeBag();
+  if (e.key === "Tab") {
+    const f = $$('button:not([hidden]), a[href], input:not([type=hidden]):not([tabindex="-1"])', drawer).filter(el => el.offsetParent !== null);
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  }
+});
+$("#checkout").onclick = () => {
+  $("#checkout").hidden = true;
+  $("#listForm").hidden = false;
+  $("#listForm input[type=email]").focus();
+};
+
+/* ---------- forms (Netlify Forms) ---------- */
+const enc = fd => new URLSearchParams([...fd.entries()]).toString();
+async function send(form) {
+  const r = await fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: enc(new FormData(form)) });
+  if (!r.ok) throw new Error(r.status);
+}
+function check(input, errEl, msg) {
+  const bad = !input.value.trim() || (input.type === "email" && !/^\S+@\S+\.\S+$/.test(input.value));
+  input.setAttribute("aria-invalid", bad);
+  if (bad) errEl.textContent = msg;
+  return !bad;
+}
+$("#wsForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  $$(".field-err", f).forEach(x => x.textContent = "");
+  const ok = [
+    check(f.name, $("#e-name"), "Enter your name."),
+    check(f.store, $("#e-store"), "Enter the name of your store."),
+    check(f.email, $("#e-email"), "Enter an email address like name@store.com.")
+  ];
+  if (ok.includes(false)) { f.querySelector('[aria-invalid="true"]').focus(); return; }
+  const b = f.querySelector("button[type=submit]");
+  b.disabled = true; b.textContent = "Sending…";
+  try { await send(f); f.hidden = true; $("#wsDone").hidden = false; $("#wsDone").focus(); }
+  catch { b.disabled = false; b.textContent = "Request the line sheet"; $("#e-store").textContent = "Your request didn't send. Check your connection and try again."; }
+});
+$("#listForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  if (!check(f.email, $("#e-list"), "Enter an email address like name@example.com.")) { f.email.focus(); return; }
+  $("#listBag").value = bag.map(b => `${byId(b.id).name} ${b.finish}${b.size ? " " + b.size : ""} x${b.qty}`).join("; ");
+  const b = f.querySelector("button[type=submit]");
+  b.disabled = true; b.textContent = "Saving…";
+  try { await send(f); f.hidden = true; $("#listDone").hidden = false; $("#listDone").focus(); }
+  catch { b.disabled = false; b.textContent = "Email me when orders open"; $("#e-list").textContent = "That didn't go through. Check your connection and try again."; }
+});
+
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2400); }
+
+buildRail();
+drawBag();
+staticPatina();
+route();
+</script>
+</body>
+</html>
